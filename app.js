@@ -11,7 +11,12 @@ var KUBERNETES_SERVICE_HOST = process.env.KUBERNETES_SERVICE_HOST || 'localhost'
 var PROTOCOL = 'https';
 var KUBE_API_PATH = '/api';
 var KUBE_API_URL = process.env.KUBE_API_URL || 'https://'+KUBERNETES_SERVICE_HOST+':'+KUBERNETES_SERVICE_PORT+ KUBE_API_PATH;
-var KUBE_API = KUBE_API_URL +'/v1/services?labelSelector='+KUBE_SELECTOR;
+var KUBE_API_SERVICES = KUBE_API_URL +'/v1/services?labelSelector='+KUBE_SELECTOR;
+
+var KUBE_APIS_PATH = '/apis';
+var KUBE_APIS_URL = process.env.KUBE_APIS_URL || 'https://'+KUBERNETES_SERVICE_HOST+':'+KUBERNETES_SERVICE_PORT+ KUBE_APIS_PATH;
+var KUBE_APIS_INGRESSES = KUBE_APIS_URL + '/extensions/v1beta1/ingresses'
+
 var KUBE_API_PODS = KUBE_API_URL +'/v1/pods';
 var DOMAIN =  process.env.DOMAIN || 'service.consul';
 var ENVIRONMENT_NAME = process.env.ENVIRONMENT_NAME || 'test';
@@ -26,15 +31,15 @@ var VULCAND_HOST_PORT = process.env.VULCAND_HOST_PORT || 80;
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
-  console.log("requesting services from " + KUBE_API);
+  console.log("requesting services from " + KUBE_API_SERVICES);
 
   var authObj = {user:KUBE_API_USER,pass:KUBE_API_PASSWORD};
 
   // call kubernetes API
-  request({uri:KUBE_API,auth:authObj}, function (error, response, body) {
+  request({uri:KUBE_API_SERVICES,auth:authObj}, function (error, response, body) {
 
     if (!error && response.statusCode == 200) {
-      var services = parseJSON(JSON.parse(body));
+      var services = parseServicesJSON(JSON.parse(body));
 
       console.log(services);
 
@@ -48,8 +53,35 @@ function checkServices() {
   })
 };
 
+// call the kubernetes API and get the list of ingresses tagged
+function checkIngresses() {
+  console.log("requesting ingresses from " + KUBE_APIS_INGRESSES);
+
+  var authObj = {user:KUBE_API_USER,pass:KUBE_API_PASSWORD};
+
+  // call kubernetes API
+  request({uri:KUBE_APIS_INGRESSES,auth:authObj}, function (error, response, body) {
+
+    if (!error && response.statusCode == 200) {
+      var ingresses = parseIngressesJSON(JSON.parse(body));
+
+      console.log(ingresses);
+
+      // add service into etcd backend for vulcand
+      // addServiceBackends(services);
+
+    } else {
+        console.log('status code'+response.statusCode +'error calling kubernetes API '+error)
+    }
+
+  })
+};
+
+
+
+
 // Parse the JSON returned from the kubernetes service API and extract the information we need.
-function parseJSON(serviceList) {
+function parseServicesJSON(serviceList) {
 
   var services= [];
 
@@ -69,6 +101,29 @@ function parseJSON(serviceList) {
   return services;
 }
 
+// Parse the JSON returned from the kubernetes service API and extract the information we need.
+function parseIngressesJSON(ingressesList) {
+
+  var ingresses= [];
+
+  for(var i =0; i < ingressesList.items.length;i++) {
+
+    var ingress = {
+      name: serviceList.items[i].metadata.name,
+      namespace: serviceList.items[i].metadata.namespace,
+      //port: serviceList.items[i].spec.ports[0].port,
+      //ip: serviceList.items[i].spec.clusterIP,
+      //annotations: serviceList.items[i].metadata.annotations
+    }
+
+    ingresses.push(ingress);
+  }
+
+  return ingresses;
+}
+
+
 // Poll the kubernetes API for new services
 // TODO we should be able to make this event based.
 Repeat(checkServices).every(SVC_POLL_INTERVAL, 'sec').start.in(2, 'sec');
+Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(2, 'sec');
