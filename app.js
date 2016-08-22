@@ -111,15 +111,18 @@ function parseIngressesJSON(ingressesList) {
     var ingress = {
       name: ingressesList.items[i].metadata.name,
       namespace: ingressesList.items[i].metadata.namespace,
-      //port: serviceList.items[i].spec.ports[0].port,
-      ip: ingressesList.items[i].status.loadBalancer.ingress.ip,
-      //annotations: serviceList.items[i].metadata.annotations
+      ip: ingressesList.items[i].status.loadBalancer.ingress[0].ip
     }
 
     ingresses.push(ingress);
   }
 
   return ingresses;
+}
+
+
+function publishIngressToConsul(ingress){
+  //TODO
 }
 
 
