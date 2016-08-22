@@ -1,0 +1,17 @@
+{
+  "name": "rancher-ingress",
+  "version": "1.0.0",
+  "description": "Service that polls a kubernetes API and gets a list of labelled services then adds them as backends to consul",
+  "main": "app.js",
+  "dependencies": {
+    "http": "0.0.0",
+    "repeat": "0.0.6",
+    "request": "^2.71.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
