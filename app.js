@@ -1,6 +1,5 @@
 var Repeat = require('repeat');
 var request = require('request');
-var etcdnodejs = require('nodejs-etcd');
 
 // the kubernetes api cert in rancher is selfsigned and auto generated so we just have to ignore that when connecting to the kubernetes API
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
