@@ -109,10 +109,10 @@ function parseIngressesJSON(ingressesList) {
   for(var i =0; i < ingressesList.items.length;i++) {
 
     var ingress = {
-      name: serviceList.items[i].metadata.name,
-      namespace: serviceList.items[i].metadata.namespace,
+      name: ingressesList.items[i].metadata.name,
+      namespace: ingressesList.items[i].metadata.namespace,
       //port: serviceList.items[i].spec.ports[0].port,
-      //ip: serviceList.items[i].spec.clusterIP,
+      ip: ingressesList.items[i].status.loadBalancer.ingress.ip,
       //annotations: serviceList.items[i].metadata.annotations
     }
 
