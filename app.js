@@ -126,12 +126,16 @@ function parseIngressesJSON(ingressesList) {
 function publishIngressToConsul(ingress){
   //TODO
   //var consulId = service.name+'-'+service.namespace;
-  var consulId = 'service-python-hello'+'-'+'default'
+
+  var hostname = 'service-python-hello'+'-'+'default';
+  var environment = 'security';
+  var consulId = hostname + '-' + environment;
 
   var consulSvc = {
                   id: consulId,
-                  name: consulId,
-                  port: 80,
+                  name: environment,
+                  tags: [hostname],
+                  port: '80',
                   address:ingress.ip
                 };
 
@@ -149,7 +153,7 @@ function publishIngressToConsul(ingress){
 
       if (!error && response.statusCode == 200) {
 
-        console.log('service '+consulId+' registered in consul and directing to ' + DOCKER_HOST_IP+ " on port "+VULCAND_HOST_PORT);
+        console.log('service '+consulId+' registered in consul and directing to ' + ingress.ip + " on port 80");
 
       } else {
           console.log('error adding service '+consulId+' to consul: '+error);
