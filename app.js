@@ -111,7 +111,7 @@ function parseIngressesJSON(ingressesList) {
   for(var i =0; i < ingressesList.items.length;i++) {
 
     if(!ingressesList.items[i].status.loadBalancer){
-      console.log('no load balancer assigned to ingress '+ ingressList.items[i].metadata.name + ' skipping');
+      console.log('no load balancer assigned to ingress '+ ingressesList.items[i].metadata.name + ' skipping');
       continue;
     }
 
@@ -122,7 +122,7 @@ function parseIngressesJSON(ingressesList) {
         var ingress = {
           name: ingressesList.items[i].metadata.name,
           namespace: ingressesList.items[i].metadata.namespace,
-          host: ingressList.items[i].spec.rules[j].host,
+          host: ingressesList.items[i].spec.rules[j].host,
           ip: ingressesList.items[i].status.loadBalancer.ingress[0].ip
         }
 
