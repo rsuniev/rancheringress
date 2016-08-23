@@ -148,6 +148,7 @@ function publishIngressToConsul(ingress){
                     id: ingress.host,
                     name: labels[1],
                     tags: [labels[0]],
+                    port: 80,
                     address:ingress.ip
                   };
 
