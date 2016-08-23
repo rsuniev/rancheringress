@@ -149,7 +149,7 @@ function publishIngressToConsul(ingress){
                     //name: labels[1],
                     //tags: [labels[0]],
                     name: 'security',
-                    tags: hostname,
+                    tags: [hostname],
                     port: 80,
                     address:ingress.ip
                   };
