@@ -142,6 +142,8 @@ function publishIngressToConsul(ingress){
     var bodyStr=JSON.stringify(consulSvc);
     var requestOpts = {url:CONSUL_API_ADDRESS,body:bodyStr};
 
+    console.log("Going to publish to consul:" + bodyStr);
+
     if(typeof(CONSUL_API_TOKEN)!== 'undefined') {
 
       requestOpts.headers = { 'X-Consul-Token': CONSUL_API_TOKEN }
