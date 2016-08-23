@@ -110,6 +110,11 @@ function parseIngressesJSON(ingressesList) {
 
   for(var i =0; i < ingressesList.items.length;i++) {
 
+    if(!ingressList.items[i].status.loadBalancer){
+      console.log('no load balancer assigned to ingress '+ ingressList.items[i].metadata.name + ' skipping');
+      continue;
+    }
+
     var ingress = {
       name: ingressesList.items[i].metadata.name,
       namespace: ingressesList.items[i].metadata.namespace,
