@@ -115,20 +115,28 @@ function parseIngressesJSON(ingressesList) {
       continue;
     }
 
-    var ingress = {
-      name: ingressesList.items[i].metadata.name,
-      namespace: ingressesList.items[i].metadata.namespace,
-      ip: ingressesList.items[i].status.loadBalancer.ingress[0].ip
-    }
+    // process all rules in each ingress looking for hosts to register DNS entries for
+    for(var j=0;j < ingressList.items[i].spec.rules.length;j++) {
+      if(ingressList.items[i].spec.rules[j].host && ingressList.items[i].status.loadBalancer.ingress){
 
-    ingresses.push(ingress);
-  }
+        var ingress = {
+          name: ingressesList.items[i].metadata.name,
+          namespace: ingressesList.items[i].metadata.namespace,
+          host: ingressList.items[i].spec.rules[j].host,
+          ip: ingressesList.items[i].status.loadBalancer.ingress[0].ip
+        }
+
+        ingresses.push(ingress);
+      }//if
+    }//for
 
   return ingresses;
 }
 
 
 function publishIngressToConsul(ingress){
+  // check host name is valid for consul registration
+  var labels = service.host.split(".");
   //TODO
   //var consulId = service.name+'-'+service.namespace;
 
@@ -137,12 +145,11 @@ function publishIngressToConsul(ingress){
   var consulId = hostname + '-' + environment;
 
   var consulSvc = {
-                  id: consulId,
-                  name: environment,
-                  tags: [hostname],
-                  port: '80',
-                  address:ingress.ip
-                };
+                    id: ingress.host,
+                    name: labels[1],
+                    tags: [labels[0]],
+                    address:ingress.ip
+                  };
 
     var bodyStr=JSON.stringify(consulSvc);
     var requestOpts = {url:CONSUL_API_ADDRESS,body:bodyStr};
