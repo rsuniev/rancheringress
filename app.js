@@ -173,7 +173,7 @@ function publishIngressToConsul(ingress){
         console.log('service ' + ingress.host +' registered in consul and directing to ' + ingress.ip + " on port 80");
 
       } else {
-          console.log('error adding service '+ingress.host+' to consul: '+error);
+          console.log('error adding service '+ingress.host+' to consul: '+error+' response <:' + response + ':>');
       }
 
     })
