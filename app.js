@@ -129,7 +129,7 @@ function parseIngressesJSON(ingressesList) {
         ingresses.push(ingress);
       }//if
     }//for
-
+  }//for  
   return ingresses;
 }
 
