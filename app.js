@@ -116,8 +116,8 @@ function parseIngressesJSON(ingressesList) {
     }
 
     // process all rules in each ingress looking for hosts to register DNS entries for
-    for(var j=0;j < ingressList.items[i].spec.rules.length;j++) {
-      if(ingressList.items[i].spec.rules[j].host && ingressList.items[i].status.loadBalancer.ingress){
+    for(var j=0;j < ingressesList.items[i].spec.rules.length;j++) {
+      if(ingressesList.items[i].spec.rules[j].host && ingressesList.items[i].status.loadBalancer.ingress){
 
         var ingress = {
           name: ingressesList.items[i].metadata.name,
@@ -129,7 +129,7 @@ function parseIngressesJSON(ingressesList) {
         ingresses.push(ingress);
       }//if
     }//for
-  }//for  
+  }//for
   return ingresses;
 }
 
