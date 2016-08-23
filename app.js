@@ -136,7 +136,7 @@ function parseIngressesJSON(ingressesList) {
 
 function publishIngressToConsul(ingress){
   // check host name is valid for consul registration
-  var labels = service.host.split(".");
+  var labels = ingress.host.split(".");
   //TODO
   //var consulId = service.name+'-'+service.namespace;
 
@@ -167,10 +167,10 @@ function publishIngressToConsul(ingress){
 
       if (!error && response.statusCode == 200) {
 
-        console.log('service '+consulId+' registered in consul and directing to ' + ingress.ip + " on port 80");
+        console.log('service ' + ingress.host +' registered in consul and directing to ' + ingress.ip + " on port 80");
 
       } else {
-          console.log('error adding service '+consulId+' to consul: '+error);
+          console.log('error adding service '+ingress.host+' to consul: '+error);
       }
 
     })
