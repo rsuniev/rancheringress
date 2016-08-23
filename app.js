@@ -136,18 +136,20 @@ function parseIngressesJSON(ingressesList) {
 
 function publishIngressToConsul(ingress){
   // check host name is valid for consul registration
-  var labels = ingress.host.split(".");
+  //var labels = ingress.host.split(".");
   //TODO
   //var consulId = service.name+'-'+service.namespace;
 
   var hostname = 'service-python-hello'+'-'+'default';
-  var environment = 'security';
-  var consulId = hostname + '-' + environment;
+  //var environment = 'security';
+  //var consulId = hostname + '-' + environment;
 
   var consulSvc = {
                     id: ingress.host,
-                    name: labels[1],
-                    tags: [labels[0]],
+                    //name: labels[1],
+                    //tags: [labels[0]],
+                    name: 'security',
+                    tags: hostname,
                     port: 80,
                     address:ingress.ip
                   };
