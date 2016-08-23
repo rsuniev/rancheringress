@@ -156,9 +156,6 @@ function publishIngressToConsul(ingress){
       }
 
     })
-  }
-
-
 }
 
 
