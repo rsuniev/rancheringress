@@ -67,8 +67,10 @@ function checkIngresses() {
 
       console.log(ingresses);
 
-      // add service into etcd backend for vulcand
-      // addServiceBackends(services);
+      // add service into consul
+      for(var i = 0; i < ingresses.length;i++) {
+        publishIngressToConsul(ingresses[i]);
+      }
 
     } else {
         console.log('status code'+response.statusCode +'error calling kubernetes API '+error)
@@ -123,10 +125,44 @@ function parseIngressesJSON(ingressesList) {
 
 function publishIngressToConsul(ingress){
   //TODO
+  //var consulId = service.name+'-'+service.namespace;
+  var consulId = 'service-python-hello'+'-'+'default'
+
+  var consulSvc = {
+                  id: consulId,
+                  name: consulId,
+                  port: 80,
+                  address:ingress.ip
+                };
+
+    var bodyStr=JSON.stringify(consulSvc);
+    var requestOpts = {url:CONSUL_API_ADDRESS,body:bodyStr};
+
+    if(typeof(CONSUL_API_TOKEN)!== 'undefined') {
+
+      requestOpts.headers = { 'X-Consul-Token': CONSUL_API_TOKEN }
+    }
+
+    // call consul API
+    request.put(requestOpts, function (error, response, body) {
+      console.log("Publish service to consul");
+
+      if (!error && response.statusCode == 200) {
+
+        console.log('service '+consulId+' registered in consul and directing to ' + DOCKER_HOST_IP+ " on port "+VULCAND_HOST_PORT);
+
+      } else {
+          console.log('error adding service '+consulId+' to consul: '+error);
+      }
+
+    })
+  }
+
+
 }
 
 
 // Poll the kubernetes API for new services
 // TODO we should be able to make this event based.
 Repeat(checkServices).every(SVC_POLL_INTERVAL, 'sec').start.in(2, 'sec');
-Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(2, 'sec');
+Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(3, 'sec');
