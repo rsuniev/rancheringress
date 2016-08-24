@@ -62,7 +62,7 @@ function addServiceIngress(services) {
     var ingress = generateIngress(groupedServices[ keys[ i ] ]);
     var bodyStr = JSON.stringify(ingress);
     var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingress.metadata.namespace+'/ingresses'
-    var requestOpts = {url:KINGRESS_REGISTER_URL,body:bodyStr};
+    var requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
 
     request.post(requestOpts, function (error, response, body) {
       console.log("Publish ingress to k8s");
