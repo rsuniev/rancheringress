@@ -138,7 +138,7 @@ function parseIngressesJSON(ingressesList) {
 function publishIngressToConsul(ingress){
   var labels = ingress.host.split(".");
 
-  if(!service.host.endsWith(DOMAIN)){
+  if(!ingress.host.endsWith(DOMAIN)){
     console.log('Ingress host names must end with '+DOMAIN);
     return;
   }
