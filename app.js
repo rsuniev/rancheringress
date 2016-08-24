@@ -140,16 +140,14 @@ function publishIngressToConsul(ingress){
   //TODO
   //var consulId = service.name+'-'+service.namespace;
 
-  var hostname = 'service-python-hello'+'-'+'default';
+  //var hostname = 'service-python-hello'+'-'+'default';
   //var environment = 'security';
   //var consulId = hostname + '-' + environment;
 
   var consulSvc = {
                     id: ingress.host,
-                    //name: labels[1],
-                    //tags: [labels[0]],
-                    name: 'default',
-                    tags: [hostname],
+                    name: labels[1],
+                    tags: [labels[0]],
                     port: 80,
                     address:ingress.ip
                   };
