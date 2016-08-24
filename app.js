@@ -65,11 +65,11 @@ function addServiceIngress(services) {
     var requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
 
     request.post(requestOpts, function (error, response, body) {
-      console.log("Publish ingress to k8s");
+      console.log("Publish ingress to kubernetes - " + bodyStr);
       if (!error && response.statusCode == 200) {
         console.log('Ingress '+ ingress.metadata.name +' is created');
       } else {
-        console.log('error adding ingress'+ingress.metadata.name+' to k8s: '+error);
+        console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes. Error: ' + error + ' Response:' + JSON.stringify(response));
       }
     })//request.post
 
