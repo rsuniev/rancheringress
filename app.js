@@ -136,7 +136,7 @@ function parseIngressesJSON(ingressesList) {
 
 function publishIngressToConsul(ingress){
   // check host name is valid for consul registration
-  //var labels = ingress.host.split(".");
+  var labels = ingress.host.split(".");
   //TODO
   //var consulId = service.name+'-'+service.namespace;
 
@@ -148,7 +148,7 @@ function publishIngressToConsul(ingress){
                     id: ingress.host,
                     //name: labels[1],
                     //tags: [labels[0]],
-                    name: 'security',
+                    name: 'default',
                     tags: [hostname],
                     port: 80,
                     address:ingress.ip
