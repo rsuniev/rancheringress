@@ -69,7 +69,7 @@ function addServiceIngress(services) {
       if (!error && response.statusCode == 200) {
         console.log('Ingress '+ ingress.metadata.name +' is created');
       } else {
-        console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes. Error: ' + error + ' Response:' + JSON.stringify(response));
+        console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
       }
     })//request.post
 
