@@ -28,6 +28,7 @@ var POD_NAME = process.env.POD_NAME;
 var DOCKER_HOST_IP = process.env.DOCKER_HOST_IP;
 var DOCKER_POD_IP = process.env.DOCKER_POD_IP;
 var VULCAND_HOST_PORT = process.env.VULCAND_HOST_PORT || 80;
+var DOMAIN =  process.env.DOMAIN || 'service.consul';
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
@@ -135,14 +136,17 @@ function parseIngressesJSON(ingressesList) {
 
 
 function publishIngressToConsul(ingress){
-  // check host name is valid for consul registration
   var labels = ingress.host.split(".");
-  //TODO
-  //var consulId = service.name+'-'+service.namespace;
 
-  //var hostname = 'service-python-hello'+'-'+'default';
-  //var environment = 'security';
-  //var consulId = hostname + '-' + environment;
+  if(!service.host.endsWith(DOMAIN)){
+    console.log('Ingress host names must end with '+DOMAIN);
+    return;
+  }
+
+  if(labels.length < 3) {
+    console.log("hostnames must be made up of at least 3 labels e.g. label1.label2."+DOMAIN);
+    return;
+  }
 
   var consulSvc = {
                     id: ingress.host,
