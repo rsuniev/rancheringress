@@ -6,7 +6,8 @@
   "dependencies": {
     "http": "0.0.0",
     "repeat": "0.0.6",
-    "request": "^2.71.0"
+    "request": "^2.71.0",
+    "underscore": "^1.6.0"
   },
   "devDependencies": {},
   "scripts": {

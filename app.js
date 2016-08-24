@@ -1,5 +1,6 @@
 var Repeat = require('repeat');
 var request = require('request');
+var _ = require('underscore');
 
 // the kubernetes api cert in rancher is selfsigned and auto generated so we just have to ignore that when connecting to the kubernetes API
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
@@ -44,8 +45,7 @@ function checkServices() {
 
       console.log(services);
 
-      // add service into etcd backend for vulcand
-      // addServiceBackends(services);
+      addServiceIngress(services);
 
     } else {
         console.log('status code'+response.statusCode +'error calling kubernetes API '+error)
@@ -53,6 +53,64 @@ function checkServices() {
 
   })
 };
+
+function addServiceIngress(services) {
+  console.log("adding services to ingress");
+  var groupedServices = _.groupBy(services,'namespace')
+  var keys = Object.keys( groupedServices );
+  for( var i = 0,length = keys.length; i < length; i++ ) {
+    var ingress = generateIngress(groupedServices[ keys[ i ] ]);
+    var bodyStr = JSON.stringify(ingress);
+    var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingress.metadata.namespace+'/ingresses'
+    var requestOpts = {url:KINGRESS_REGISTER_URL,body:bodyStr};
+
+    request.post(requestOpts, function (error, response, body) {
+      console.log("Publish ingress to k8s");
+      if (!error && response.statusCode == 200) {
+        console.log('Ingress '+ ingress.metadata.name +' is created');
+      } else {
+        console.log('error adding ingress'+ingress.metadata.name+' to k8s: '+error);
+      }
+    })//request.post
+
+  }//for
+}
+
+function generateIngress(groupedService) {
+  var hosts = [];
+  var namespace
+  for(var i =0; i < groupedService.length;i++) {
+    if(typeof(namespace)== 'undefined') {
+      namespace = groupedService[i].namespace;
+    }
+    namespace = groupedService[i].namespace
+    //console.log(groupedService[i])
+    hosts.push({
+      host: groupedService[i].name + '.' + groupedService[i].namespace + '.' + DOMAIN,
+      http: {
+        paths: [{
+          backend: {
+            serviceName: groupedService[i].name,
+            servicePort: groupedService[i].port
+          }
+        }]
+      }
+    });
+  }
+
+  var ingress = {
+    "apiVersion": "extensions/v1beta1",
+    "kind": "Ingress",
+    "metadata": {
+      "namespace": namespace,
+      "name": "test-" + namespace
+    },
+    "spec": {
+      "rules": hosts
+    }
+  }
+  return ingress;
+}
 
 // call the kubernetes API and get the list of ingresses tagged
 function checkIngresses() {
