@@ -71,11 +71,12 @@ function addServiceIngress(services) {
       } else if (response.statusCode == 409) {
         console.log('Ingress ' + ingress.metadata.name + ' already exist. Going to replace');
         request.put(requestOpts, function (error1, response1, body1){
-        if (response.statusCode !== 200) {
-          console.log('error updating ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error1 + ' Response:' + JSON.stringify(response1));
-        }else{
-          console.log('Ingress '+ ingress.metadata.name +' is updated');
-        }
+          if (response.statusCode !== 200) {
+            console.log('error updating ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error1 + ' Response:' + JSON.stringify(response1));
+          }else{
+            console.log('Ingress '+ ingress.metadata.name +' is updated');
+          }
+        }//request
       } else {
         console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
       }
