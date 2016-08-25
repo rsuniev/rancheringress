@@ -76,11 +76,11 @@ function addServiceIngress(services) {
           }else{
             console.log('Ingress '+ ingress.metadata.name +' is updated');
           }
-        }//request
+        })//request.post
       } else {
         console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
       }
-    })//request.post
+    })//request.put
 
   }//for
 }
