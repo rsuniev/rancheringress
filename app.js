@@ -33,7 +33,7 @@ var DOMAIN =  process.env.DOMAIN || 'service.consul';
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
-  console.log("requesting services from " + KUBE_API_SERVICES);
+  //console.log("requesting services from " + KUBE_API_SERVICES);
 
   var authObj = {user:KUBE_API_USER,pass:KUBE_API_PASSWORD};
 
@@ -43,19 +43,19 @@ function checkServices() {
     if (!error && response.statusCode == 200) {
       var services = parseServicesJSON(JSON.parse(body));
 
-      console.log(services);
+      console.log("Services found: " + services);
 
       addServiceIngress(services);
 
     } else {
-        console.log('status code'+response.statusCode +'error calling kubernetes API '+error)
+      console.log('status code'+response.statusCode +'error calling kubernetes API '+error)
     }
 
   })
 };
 
 function addServiceIngress(services) {
-  console.log("adding services to ingress");
+  //console.log("adding services to ingress");
   var groupedServices = _.groupBy(services,'namespace')
   var keys = Object.keys( groupedServices );
   for( var i = 0,length = keys.length; i < length; i++ ) {
@@ -66,8 +66,16 @@ function addServiceIngress(services) {
 
     request.post(requestOpts, function (error, response, body) {
       console.log("Publish ingress to kubernetes - " + bodyStr);
-      if (!error && response.statusCode == 200) {
+      if (!error && response.statusCode == 201) {
         console.log('Ingress '+ ingress.metadata.name +' is created');
+      } else if (response.statusCode == 409) {
+        console.log('Ingress ' + ingress.metadata.name + ' already exist. Going to replace');
+        request.put(requestOpts, function (error1, response1, body1){
+        if (response.statusCode !== 200) {
+          console.log('error updating ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error1 + ' Response:' + JSON.stringify(response1));
+        }else{
+          console.log('Ingress '+ ingress.metadata.name +' is updated');
+        }
       } else {
         console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
       }
@@ -124,7 +132,7 @@ function checkIngresses() {
     if (!error && response.statusCode == 200) {
       var ingresses = parseIngressesJSON(JSON.parse(body));
 
-      console.log(ingresses);
+      console.log("Ingress found: " + ingresses);
 
       // add service into consul
       for(var i = 0; i < ingresses.length;i++) {
