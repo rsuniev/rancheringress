@@ -70,6 +70,8 @@ function addServiceIngress(services) {
 
     bodyStr = JSON.stringify(ingress);
 
+    console.log('PAYLOAD: ' + bodyStr);
+
     INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingress.metadata.namespace+'/ingresses'
     requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
 
