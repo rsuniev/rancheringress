@@ -58,13 +58,18 @@ function addServiceIngress(services) {
   //console.log("adding services to ingress");
   var groupedServices = _.groupBy(services,'namespace')
   var keys = Object.keys( groupedServices );
+  console.log('keys:',keys);
   var bodyStr;
   var requestOpts;
   var ingress;
   var INGRESS_REGISTER_URL;
   for( var i = 0,length = keys.length; i < length; i++ ) {
+    console.log('groupedServices[ keys[ i ] ] >>>>',groupedServices[ keys[ i ] ]);
+
     ingress = generateIngress(groupedServices[ keys[ i ] ]);
+
     bodyStr = JSON.stringify(ingress);
+
     INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingress.metadata.namespace+'/ingresses'
     requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
 
@@ -134,7 +139,7 @@ function checkIngresses() {
     if (!error && response.statusCode == 200) {
       var ingresses = parseIngressesJSON(JSON.parse(body));
 
-      console.log("Ingress found: " + ingresses);
+      console.log("Ingress found: " + JSON.stringify(ingresses));
 
       // add service into consul
       for(var i = 0; i < ingresses.length;i++) {
