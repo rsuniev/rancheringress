@@ -55,46 +55,37 @@ function checkServices() {
 };
 
 function addServiceIngress(services) {
-  //console.log("adding services to ingress");
   var groupedServices = _.groupBy(services,'namespace')
   var keys = Object.keys( groupedServices );
-  console.log('keys:',keys);
-  var bodyStr;
-  var requestOpts;
-  var ingress;
-  var INGRESS_REGISTER_URL;
   for( var i = 0,length = keys.length; i < length; i++ ) {
-    console.log('groupedServices[ keys[ i ] ] >>>>',groupedServices[ keys[ i ] ]);
-
-    ingress = generateIngress(groupedServices[ keys[ i ] ]);
-
-    bodyStr = JSON.stringify(ingress);
-
-    console.log('PAYLOAD: ' + bodyStr);
-
-    INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingress.metadata.namespace+'/ingresses'
-    requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
-
-    request.post(requestOpts, function (error, response, body) {
-      console.log("Publish ingress to kubernetes - " + bodyStr);
-      if (!error && response.statusCode == 201) {
-        console.log('Ingress '+ ingress.metadata.name +' is created');
-      } else if (response.statusCode == 409) {
-        console.log('Ingress ' + ingress.metadata.name + ' already exist. Going to replace');
-        requestOpts = {url:INGRESS_REGISTER_URL + "/" + ingress.metadata.name, body:bodyStr};
-        request.put(requestOpts, function (error1, response1, body1){
-          if (response1.statusCode !== 200) {
-            console.log('error updating ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error1 + ' Response:' + JSON.stringify(response1));
-          }else{
-            console.log('Ingress '+ ingress.metadata.name +' is updated');
-          }
-        })//request.post
-      } else {
-        console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
-      }
-    })//request.put
-
+    var ingress = generateIngress(groupedServices[ keys[ i ] ]);
+    publishIngress(ingress);
   }//for
+}
+
+function publishIngress(ingress){
+  var bodyStr = JSON.stringify(ingress);
+  var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingress.metadata.namespace+'/ingresses'
+  var requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
+
+  request.post(requestOpts, function (error, response, body) {
+    console.log("Publish ingress to kubernetes - " + bodyStr);
+    if (!error && response.statusCode == 201) {
+      console.log('Ingress '+ ingress.metadata.name +' is created');
+    } else if (response.statusCode == 409) {
+      console.log('Ingress ' + ingress.metadata.name + ' already exist. Going to replace');
+      requestOpts = {url:INGRESS_REGISTER_URL + "/" + ingress.metadata.name, body:bodyStr};
+      request.put(requestOpts, function (error1, response1, body1){
+        if (response1.statusCode !== 200) {
+          console.log('error updating ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error1 + ' Response:' + JSON.stringify(response1));
+        }else{
+          console.log('Ingress '+ ingress.metadata.name +' is updated');
+        }
+      })//request.post
+    } else {
+      console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
+    }
+  })//request.put
 }
 
 function generateIngress(groupedService) {
