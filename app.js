@@ -73,7 +73,13 @@ function isIngressExist(ingressName, ingressNamespace){
   var INGRESS_READ_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses/' + ingressName;
   console.log('checking isIngressExist: ' + INGRESS_READ_URL);
   request.get(INGRESS_READ_URL, function (err, res, body) {
-    return (!err && res.statusCode == 200);
+    if (!err && res.statusCode == 200) {
+      console.log('Ingress found');
+      return true;
+    } else{
+      console.log('Ingress is found');
+      return false;
+    }
   });
 }
 
