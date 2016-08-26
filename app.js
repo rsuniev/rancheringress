@@ -53,12 +53,12 @@ function addServiceIngress(services) {
   var groupedServices = _.groupBy(services,'namespace')
   var keys = Object.keys( groupedServices );
   for( var i = 0,length = keys.length; i < length; i++ ) {
-    var groupedService = (groupedServices[ keys[ i ] ]);
-    var hosts = generateIngressHosts(groupedService);
-    var ingressName = 'test-'+groupedService.namespace;;
+    var data = generateIngressHosts(groupedServices[ keys[ i ] ]);
+    var ingressName = 'test-'+data.namespace;
     console.log('ingressName' + ingressName);
-    var ingressNamespace = groupedService.namespace;
+    var ingressNamespace = data.namespace;
     console.log('ingressNamespace' + ingressNamespace);
+    var hosts = data.hosts;
     if(isIngressExist(ingressName,ingressNamespace)){
       console.log('ingress exists');
       patchIngress(ingressName,ingressNamespace,hosts);
@@ -164,7 +164,10 @@ function generateIngressHosts(groupedService){
       }
     });
   }
-  return hosts;
+  return {
+    hosts: hosts,
+    namespace: namespace
+  };
 }
 
 // call the kubernetes API and get the list of ingresses tagged
