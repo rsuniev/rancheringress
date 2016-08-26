@@ -53,9 +53,10 @@ function addServiceIngress(services) {
   var groupedServices = _.groupBy(services,'namespace')
   var keys = Object.keys( groupedServices );
   for( var i = 0,length = keys.length; i < length; i++ ) {
-    var hosts = generateIngressHosts(groupedServices[ keys[ i ] ]);
-    var ingressName = 'test-'+groupedService[i].namespace;;
-    var ingressNamespace = groupedService[i].namespace;
+    var groupedService = (groupedServices[ keys[ i ] ]);
+    var hosts = generateIngressHosts(groupedService);
+    var ingressName = 'test-'+groupedService.namespace;;
+    var ingressNamespace = groupedService.namespace;
     if(isIngressExist(ingressName,ingressNamespace)){
       patchIngress(ingressName,ingressNamespace,hosts);
     }else{
