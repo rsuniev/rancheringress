@@ -68,7 +68,7 @@ function addServiceIngress(services) {
 function isIngressExist(ingressName, ingressNamespace){
   var INGRESS_READ_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses/' + ingressName;
   request.get(INGRESS_READ_URL, function (err, res, body) {
-    return (!err && response.statusCode == 200);
+    return (!err && res.statusCode == 200);
   });
 }
 
