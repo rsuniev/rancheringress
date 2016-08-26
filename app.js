@@ -72,7 +72,7 @@ function updateIngress(ingressName, ingressNamespace,hosts){
       patchIngress(ingressName,ingressNamespace,hosts);
     } else{
       console.log('ingress does not exist. creating');
-      createIngress(ingressName, ingressNamespace,hosts);
+      createIngress(ingressName,ingressNamespace,hosts);
     }
   });
 }
@@ -104,14 +104,12 @@ function createIngress(ingressName, ingressNamespace,hosts){
   });
 }
 
-function patchIngress(ingressName, ingressNamespace,hosts){
+function patchIngress(ingressName,ingressNamespace,hosts){
   var ingress = {"spec": {"rules": hosts}};
-
   var bodyStr = JSON.stringify(ingress);
-  var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses'
-  var requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
-
-  requestOpts = {url:INGRESS_REGISTER_URL + "/" + ingressName, body:bodyStr};
+  var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses';
+  var requestOpts = {url:INGRESS_REGISTER_URL + "/" + ingressName, body:bodyStr};
+  console.log('Going to patch ingress on ' + INGRESS_REGISTER_URL + '/' + ingressName + " with payload " + bodyStr);
   request.patch(requestOpts, function (error, response, body){
     if (response.statusCode !== 200) {
       console.log('error updating ingress '+ ingressName + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
