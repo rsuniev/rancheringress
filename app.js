@@ -18,23 +18,18 @@ var KUBE_APIS_PATH = '/apis';
 var KUBE_APIS_URL = process.env.KUBE_APIS_URL || 'https://'+KUBERNETES_SERVICE_HOST+':'+KUBERNETES_SERVICE_PORT+ KUBE_APIS_PATH;
 var KUBE_APIS_INGRESSES = KUBE_APIS_URL + '/extensions/v1beta1/ingresses'
 
-var KUBE_API_PODS = KUBE_API_URL +'/v1/pods';
 var DOMAIN =  process.env.DOMAIN || 'service.consul';
 var ENVIRONMENT_NAME = process.env.ENVIRONMENT_NAME || 'test';
 var KUBE_API_USER = process.env.KUBE_API_USER || '';
 var KUBE_API_PASSWORD = process.env.KUBE_API_PASSWORD || '';
 var CONSUL_API_ADDRESS = process.env.CONSUL_API_ADDRESS || 'http://kubernetes';
 var CONSUL_API_TOKEN = process.env.CONSUL_API_TOKEN;
-var POD_NAME = process.env.POD_NAME;
 var DOCKER_HOST_IP = process.env.DOCKER_HOST_IP;
 var DOCKER_POD_IP = process.env.DOCKER_POD_IP;
-var VULCAND_HOST_PORT = process.env.VULCAND_HOST_PORT || 80;
 var DOMAIN =  process.env.DOMAIN || 'service.consul';
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
-  //console.log("requesting services from " + KUBE_API_SERVICES);
-
   var authObj = {user:KUBE_API_USER,pass:KUBE_API_PASSWORD};
 
   // call kubernetes API
@@ -58,10 +53,68 @@ function addServiceIngress(services) {
   var groupedServices = _.groupBy(services,'namespace')
   var keys = Object.keys( groupedServices );
   for( var i = 0,length = keys.length; i < length; i++ ) {
-    var ingress = generateIngress(groupedServices[ keys[ i ] ]);
-    publishIngress(ingress);
+    var hosts = generateIngressHosts(groupedServices[ keys[ i ] ]));
+    var ingressName = 'test-'+groupedService[i].namespace;;
+    var ingressNamespace = groupedService[i].namespace;
+    if(isIngressExist(ingressName,ingressNamespace)){
+      patchIngress(ingressName,ingressNamespace,hosts);
+    }else{
+      createIngress(ingressName, ingressNamespace,hosts)
+    }
   }//for
 }
+
+function isIngressExist(ingressName, ingressNamespace){
+  var INGRESS_READ_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses/' + ingressName;
+  request.get(INGRESS_READ_URL, function (err, res, body) {
+    return (!err && response.statusCode == 200);
+  });
+}
+
+
+function createIngress(ingressName, ingressNamespace,hosts){
+  var ingress = {
+       "apiVersion": "extensions/v1beta1",
+       "kind": "Ingress",
+       "metadata": {
+         "namespace": ingressNamespace,
+         "name": ingressName
+       },
+       "spec": {
+         "rules": hosts
+       }
+     }
+  var bodyStr = JSON.stringify(ingress);
+  var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses'
+  var requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
+
+  request.post(requestOpts, function (error, response, body) {
+    console.log("Publish ingress to kubernetes - " + bodyStr);
+    if (!error && response.statusCode == 201) {
+      console.log('Ingress '+ ingress.metadata.name +' is created');
+    } else{
+      console.log('error adding ingress '+ ingress.metadata.name + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
+    }
+  });
+}
+
+function patchIngress(ingressName, ingressNamespace,hosts){
+  var ingress = {"spec": {"rules": hosts}};
+
+  var bodyStr = JSON.stringify(ingress);
+  var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses'
+  var requestOpts = {url:INGRESS_REGISTER_URL,body:bodyStr};
+
+  requestOpts = {url:INGRESS_REGISTER_URL + "/" + ingressName, body:bodyStr};
+  request.patch(requestOpts, function (error, response, body){
+    if (response.statusCode !== 200) {
+      console.log('error updating ingress '+ ingressName + ' to kubernetes.  Error: ' + error + ' Response:' + JSON.stringify(response));
+    }else{
+      console.log('Ingress '+ ingressName +' is updated');
+    }
+  });//request.patch
+}
+
 
 function publishIngress(ingress){
   var bodyStr = JSON.stringify(ingress);
@@ -88,7 +141,7 @@ function publishIngress(ingress){
   })//request.put
 }
 
-function generateIngress(groupedService) {
+function generateIngressHosts(groupedService){
   var hosts = [];
   var namespace;
   for(var i =0; i < groupedService.length;i++) {
@@ -105,19 +158,7 @@ function generateIngress(groupedService) {
       }
     });
   }
-
-  var ingress = {
-    "apiVersion": "extensions/v1beta1",
-    "kind": "Ingress",
-    "metadata": {
-      "namespace": namespace,
-      "name": "test-" + namespace
-    },
-    "spec": {
-      "rules": hosts
-    }
-  }
-  return ingress;
+  return hosts;
 }
 
 // call the kubernetes API and get the list of ingresses tagged
