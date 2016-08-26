@@ -56,10 +56,14 @@ function addServiceIngress(services) {
     var groupedService = (groupedServices[ keys[ i ] ]);
     var hosts = generateIngressHosts(groupedService);
     var ingressName = 'test-'+groupedService.namespace;;
+    console.log('ingressName' + ingressName);
     var ingressNamespace = groupedService.namespace;
+    console.log('ingressNamespace' + ingressNamespace);
     if(isIngressExist(ingressName,ingressNamespace)){
+      console.log('ingress exists');
       patchIngress(ingressName,ingressNamespace,hosts);
     }else{
+      console.log('ingress does not exist. creating');
       createIngress(ingressName, ingressNamespace,hosts)
     }
   }//for
@@ -67,6 +71,7 @@ function addServiceIngress(services) {
 
 function isIngressExist(ingressName, ingressNamespace){
   var INGRESS_READ_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses/' + ingressName;
+  console.log('checking isIngressExist: ' + INGRESS_READ_URL);
   request.get(INGRESS_READ_URL, function (err, res, body) {
     return (!err && res.statusCode == 200);
   });
