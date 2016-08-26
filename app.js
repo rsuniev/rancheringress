@@ -59,26 +59,20 @@ function addServiceIngress(services) {
     var ingressNamespace = data.namespace;
     console.log('ingressNamespace' + ingressNamespace);
     var hosts = data.hosts;
-    if(isIngressExist(ingressName,ingressNamespace) == true){
-      console.log('ingress exists');
-      patchIngress(ingressName,ingressNamespace,hosts);
-    }else{
-      console.log('ingress does not exist. creating');
-      createIngress(ingressName, ingressNamespace,hosts)
-    }
+    updateIngress(ingressName,ingressNamespace,hosts);
   }//for
 }
 
-function isIngressExist(ingressName, ingressNamespace){
+function updateIngress(ingressName, ingressNamespace,hosts){
   var INGRESS_READ_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses/' + ingressName;
   console.log('checking isIngressExist: ' + INGRESS_READ_URL);
   request.get(INGRESS_READ_URL, function (err, res, body) {
     if (!err && res.statusCode == 200) {
-      console.log('Ingress found');
-      return 1;
+      console.log('ingress exists');
+      patchIngress(ingressName,ingressNamespace,hosts);
     } else{
-      console.log('Ingress is found');
-      return 0;
+      console.log('ingress does not exist. creating');
+      createIngress(ingressName, ingressNamespace,hosts);
     }
   });
 }
