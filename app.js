@@ -27,6 +27,7 @@ var CONSUL_API_TOKEN = process.env.CONSUL_API_TOKEN;
 var DOCKER_HOST_IP = process.env.DOCKER_HOST_IP;
 var DOCKER_POD_IP = process.env.DOCKER_POD_IP;
 var DOMAIN =  process.env.DOMAIN || 'service.consul';
+var ENVIRONMENT_NAME = process.env.ENVIRONMENT_NAME || 'test';
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
@@ -54,7 +55,7 @@ function addServiceIngress(services) {
   var keys = Object.keys( groupedServices );
   for( var i = 0,length = keys.length; i < length; i++ ) {
     var data = generateIngressHosts(groupedServices[ keys[ i ] ]);
-    var ingressName = 'test-'+data.namespace;
+    var ingressName = ENVIRONMENT_NAME + '-' + data.namespace;
     console.log('ingressName' + ingressName);
     var ingressNamespace = data.namespace;
     console.log('ingressNamespace' + ingressNamespace);
@@ -109,7 +110,7 @@ function patchIngress(ingressName,ingressNamespace,hosts){
   var bodyStr = JSON.stringify(ingress);
   var INGRESS_REGISTER_URL = KUBE_APIS_URL + '/extensions/v1beta1/namespaces/'+ ingressNamespace+'/ingresses';
   var requestOpts = {url:INGRESS_REGISTER_URL + "/" + ingressName, headers : {"Content-Type" : "application/strategic-merge-patch+json"}, body:bodyStr};
-  console.log('Going to patch ingress on ' + INGRESS_REGISTER_URL + '/' + ingressName + " with payload " + bodyStr);  
+  console.log('Going to patch ingress on ' + INGRESS_REGISTER_URL + '/' + ingressName + " with payload " + bodyStr);
   request.patch(requestOpts, function (error, response, body)
     {
     if (response.statusCode !== 200) {
@@ -152,7 +153,7 @@ function generateIngressHosts(groupedService){
   for(var i =0; i < groupedService.length;i++) {
     namespace = groupedService[i].namespace;
     hosts.push({
-      host: groupedService[i].name + '.' + groupedService[i].namespace + '.' + DOMAIN,
+      host: groupedService[i].name + '-' + groupedService[i].namespace + '.' + ENVIRONMENT_NAME + '.' + DOMAIN,
       http: {
         paths: [{
           backend: {
@@ -299,5 +300,5 @@ function publishIngressToConsul(ingress){
 
 // Poll the kubernetes API for new services
 // TODO we should be able to make this event based.
-Repeat(checkServices).every(SVC_POLL_INTERVAL, 'sec').start.in(2, 'sec');
-Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(3, 'sec');
+Repeat(checkServices).every(SVC_POLL_INTERVAL, 'sec').start.in(30, 'sec');
+Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(5, 'sec');
