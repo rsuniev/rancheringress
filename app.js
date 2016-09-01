@@ -28,6 +28,7 @@ var DOCKER_HOST_IP = process.env.DOCKER_HOST_IP;
 var DOCKER_POD_IP = process.env.DOCKER_POD_IP;
 var DOMAIN =  process.env.DOMAIN || 'service.consul';
 var ENVIRONMENT_NAME = process.env.ENVIRONMENT_NAME || 'test';
+var ENV_SLEEP_SECONDS = process.env.ENV_SLEEP_SECONDS || 15;
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
@@ -300,5 +301,5 @@ function publishIngressToConsul(ingress){
 
 // Poll the kubernetes API for new services
 // TODO we should be able to make this event based.
-Repeat(checkServices).every(SVC_POLL_INTERVAL, 'sec').start.in(60, 'sec');
-Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(60, 'sec');
+Repeat(checkServices).every(SVC_POLL_INTERVAL, 'sec').start.in(ENV_SLEEP_SECONDS, 'sec');
+Repeat(checkIngresses).every(SVC_POLL_INTERVAL, 'sec').start.in(ENV_SLEEP_SECONDS, 'sec');
