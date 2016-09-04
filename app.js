@@ -6,7 +6,7 @@ var _ = require('underscore');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 var SVC_POLL_INTERVAL = process.env.SVC_POLL_INTERVAL || 15;
-var KUBE_SELECTOR = process.env.KUBE_SELECTOR ||  'type%3Dingress';
+var KUBE_SELECTOR = process.env.KUBE_SELECTOR ||  'type%3Drancheringress';
 var KUBERNETES_SERVICE_PORT = process.env.KUBERNETES_SERVICE_PORT || '8080';
 var KUBERNETES_SERVICE_HOST = process.env.KUBERNETES_SERVICE_HOST || 'localhost';
 var PROTOCOL = 'https';
