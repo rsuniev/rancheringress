@@ -27,8 +27,8 @@ var CONSUL_API_TOKEN = process.env.CONSUL_API_TOKEN;
 var DOCKER_HOST_IP = process.env.DOCKER_HOST_IP;
 var DOCKER_POD_IP = process.env.DOCKER_POD_IP;
 var DOMAIN =  process.env.DOMAIN || 'service.consul';
-var ENVIRONMENT_NAME = process.env.ENVIRONMENT_NAME || 'test';
 var ENV_SLEEP_SECONDS = process.env.ENV_SLEEP_SECONDS || 15;
+var NAMESPACE_NAME = process.env.NAMESPACE_NAME || 'default';
 
 // call the kubernetes API and get the list of services tagged
 function checkServices() {
@@ -236,15 +236,18 @@ function parseIngressesJSON(ingressesList) {
     // process all rules in each ingress looking for hosts to register DNS entries for
     for(var j=0;j < ingressesList.items[i].spec.rules.length;j++) {
       if(ingressesList.items[i].spec.rules[j].host && ingressesList.items[i].status.loadBalancer.ingress){
+        var ingressName = ingressesList.items[i].metadata.name;
+        if(ENVIRONMENT_NAME + '-' + NAMESPACE_NAME === ingressName){
 
-        var ingress = {
-          name: ingressesList.items[i].metadata.name,
-          namespace: ingressesList.items[i].metadata.namespace,
-          host: ingressesList.items[i].spec.rules[j].host,
-          ip: ingressesList.items[i].status.loadBalancer.ingress[0].ip
-        }
+            var ingress = {
+              name: ingressName,
+              namespace: ingressesList.items[i].metadata.namespace,
+              host: ingressesList.items[i].spec.rules[j].host,
+              ip: ingressesList.items[i].status.loadBalancer.ingress[0].ip
+            }
 
-        ingresses.push(ingress);
+            ingresses.push(ingress);
+        }//if(ENVIRONMENT_NAME + '-' + NAMESPACE_NAME
       }//if
     }//for
   }//for
